@@ -6,7 +6,7 @@ library(here)
 library(camtrapR)
 
 # bring in spreadsheet with a column for the link called "URL" and/or partial link info called "URL_Partial" (see below)
-url_info <- vroom ("data/url_info.csv", delim = ",")
+url_info <- read.csv("data/url_info.csv", delim = ",")
 
 # this is needed if the URL is incomplete (ex. with Snapshot Serengeti file names)
 url_info$URL <- paste("https://snapshotserengeti.s3.msi.umn.edu", 
