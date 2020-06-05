@@ -21,9 +21,9 @@ head(url_info)
 
 # download all images to hard drive. you first need to create the "downloaded-images" file in this R project folder (working directory)
 mapply(download.file, 
-       consensus_data_mongoose$URL, 
+       url_info$URL, 
        destfile = here::here("downloaded-images", 
-                             basename(consensus_data_mongoose$URL_Partial))) 
+                             basename(url_info$URL_Partial))) 
 
 # then sort them into folders manually based on species (if you want; or just put in one dummy species folder) 
 # and come back to this script to generate a csv with the date, time, file name, species, which you can export and populate with other columns 
