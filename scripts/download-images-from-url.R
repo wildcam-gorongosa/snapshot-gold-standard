@@ -5,25 +5,39 @@ library(tidyverse)
 library(here)
 library(camtrapR)
 
-# bring in spreadsheet with a column for the link called "URL" and/or partial link info called "URL_Partial" (see below)
-url_info <- read.csv("data/url_info.csv", delim = ",")
+# bring in consensus samples - there are three columns for URLs of the three images
+samples <- read.csv("data/KGA_S1_report_consensus_samples_S1.csv")
 
-# this is needed if the URL is incomplete (ex. with Snapshot Serengeti file names)
-url_info$URL <- paste("https://snapshotserengeti.s3.msi.umn.edu", 
-                      url_info$URL_Partial, 
-                      sep = '/') 
+# make blank columns into NA so they can be dropped later; also rename so they can be used in the file names
+samples <- samples %>% 
+    mutate(img1 = na_if(zooniverse_url_0, ""),
+           img2 = na_if(zooniverse_url_1, ""),
+           img3 = na_if(zooniverse_url_2, ""))
 
-# if you ONLY have URL, we'll need to do the opposite to generate "URL_Partial" for use in file names
-# ex. use strsplit() to take the URL and split out the first/repeated part so you can use just the unique info in the file name
+# get it so that each image is in its own row; add column for number
+samples_long <- pivot_longer(samples,
+                             cols = c(img1, img2, img3),
+                             names_to = "image_seq",
+                             values_to = "url",
+                             values_drop_na = TRUE)
 
-# make sure it worked
-head(url_info)
+# make url a character string
+samples_long$url <- as.character(samples_long$url)
+
+# combine season, site, roll, capture and image_seq so each row has unique name (to be used as file name)
+samples_long$file_name <- paste(samples_long$site,
+                                samples_long$roll,
+                                samples_long$capture,
+                                samples_long$image_seq,
+                                sep = "_")
+# add .jpeg extension
+samples_long$file_name <- paste(samples_long$file_name, ".jpeg", sep = "")
 
 # download all images to hard drive. you first need to create the "downloaded-images" file in this R project folder (working directory)
 mapply(download.file, 
-       url_info$URL, 
-       destfile = here::here("downloaded-images", 
-                             basename(url_info$URL_Partial))) 
+       samples_long$url, 
+       destfile = here::here("data/downloaded-images", 
+                             basename(samples_long$file_name))) 
 
 # then sort them into folders manually based on species (if you want; or just put in one dummy species folder) 
 # and come back to this script to generate a csv with the date, time, file name, species, which you can export and populate with other columns 
@@ -31,7 +45,7 @@ mapply(download.file,
 # generate record table
 records <- recordTable(inDir = here::here("downloaded-images"),
                        IDfrom = "directory",
-                       timeZone = "Africa/Maputo",
+                       timeZone = "Africa/Maputo", # or change to wherever site is; or it doesn't really matter, since we don't need this info
                        removeDuplicateRecords = FALSE)
 
 # export csv
