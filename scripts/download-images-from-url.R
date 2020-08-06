@@ -5,18 +5,20 @@ library(tidyverse)
 library(here)
 library(camtrapR)
 
-# bring in consensus samples - there are three columns for URLs of the three images
-samples <- read.csv("data/KGA_S1_report_consensus_samples_S1.csv")
+# bring in assignment
+samples <- read.csv("data/WLD_GoldStandard_DataEntry_kg.csv")
+
+# add index column
+samples$index <- c(1:nrow(samples))
 
 # make blank columns into NA so they can be dropped later; also rename so they can be used in the file names
 samples <- samples %>% 
     mutate(img1 = na_if(zooniverse_url_0, ""),
-           img2 = na_if(zooniverse_url_1, ""),
-           img3 = na_if(zooniverse_url_2, ""))
+           img2 = na_if(zooniverse_url_1, ""))
 
 # get it so that each image is in its own row; add column for number
 samples_long <- pivot_longer(samples,
-                             cols = c(img1, img2, img3),
+                             cols = c(img1, img2),
                              names_to = "image_seq",
                              values_to = "url",
                              values_drop_na = TRUE)
@@ -25,7 +27,8 @@ samples_long <- pivot_longer(samples,
 samples_long$url <- as.character(samples_long$url)
 
 # combine season, site, roll, capture and image_seq so each row has unique name (to be used as file name)
-samples_long$file_name <- paste(samples_long$site,
+samples_long$file_name <- paste(samples_long$index,
+                                samples_long$site,
                                 samples_long$roll,
                                 samples_long$capture,
                                 samples_long$image_seq,
@@ -38,17 +41,5 @@ mapply(download.file,
        samples_long$url, 
        destfile = here::here("data/downloaded-images", 
                              basename(samples_long$file_name))) 
-
-# then sort them into folders manually based on species (if you want; or just put in one dummy species folder) 
-# and come back to this script to generate a csv with the date, time, file name, species, which you can export and populate with other columns 
-
-# generate record table
-records <- recordTable(inDir = here::here("downloaded-images"),
-                       IDfrom = "directory",
-                       timeZone = "Africa/Maputo", # or change to wherever site is; or it doesn't really matter, since we don't need this info
-                       removeDuplicateRecords = FALSE)
-
-# export csv
-write_csv(records, here::here("data", "records.csv"))
 
 
