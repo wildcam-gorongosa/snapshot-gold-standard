@@ -42,16 +42,10 @@ mapply(download.file,
        destfile = here::here("data/downloaded-images", 
                              basename(samples_long$file_name))) 
 
-# was stalling at index 482 for some reason..... restarted here
-samples_long_2 <- filter(samples_long, index >= 482)
+# was stalling periodically for some reason..... restarted here based on where it stopped
+samples_long_2 <- filter(samples_long, index >= 5359)
 mapply(download.file, 
        samples_long_2$url, 
        destfile = here::here("data/downloaded-images", 
                              basename(samples_long_2$file_name)))
 
-# was stalling at index 1294 for some reason..... restarted here (continued this for future resets)
-samples_long_3 <- filter(samples_long, index >= 1294)
-mapply(download.file, 
-       samples_long_3$url, 
-       destfile = here::here("data/downloaded-images", 
-                             basename(samples_long_3$file_name)))
