@@ -5,10 +5,10 @@ library(tidyverse)
 library(here)
 library(camtrapR)
 
-setwd("D:/PapersInProcess/GoldStandard_SnapshotSafari/Samples/MTZ")
+#setwd("D:/PapersInProcess/GoldStandard_SnapshotSafari/Samples/MTZ")
 
 # bring in consensus samples - there are three columns for URLs of the three images
-samples <- read.csv("MTZ_GoldStandard_DataEntry.csv")
+samples <- read.csv("data/MTZ_GoldStandard_DataEntry.csv")
 
 # make blank columns into NA so they can be dropped later; also rename so they can be used in the file names
 samples <- samples %>% 
